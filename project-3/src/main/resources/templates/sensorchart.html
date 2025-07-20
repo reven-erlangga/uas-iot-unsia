@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sensor Data View - UNSIA IoT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Tetap agar canvas responsive tinggi */
+    canvas {
+      height: 300px !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-white text-gray-700 font-sans">
+
+  <!-- Navigation -->
+  <nav class="bg-gray-100 border-b border-gray-300 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="#" class="text-2xl font-semibold tracking-wide text-gray-900 hover:text-gray-700 transition duration-300">
+        UNSIA IoT
+      </a>
+      <ul class="flex space-x-8 text-base font-medium text-gray-600">
+        <li><a href="#" class="hover:text-gray-900 transition">Chart</a></li>
+        <li><a href="#" class="hover:text-gray-900 transition">Data</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="flex-grow flex flex-col justify-center items-center text-center px-6 py-20 max-w-4xl mx-auto space-y-8">
+
+    <h1 th:text="${message}" class="text-4xl font-extrabold leading-snug tracking-tight text-gray-900">
+      Sensor Data Dashboard
+    </h1>
+
+    <section class="bg-gray-50 rounded-xl p-8 shadow-md w-full border border-gray-200">
+
+      <h2 class="text-2xl font-semibold mb-6 border-b border-gray-300 pb-3 text-gray-800">
+        Device: <span th:text="${deviceId}">device01</span>
+      </h2>
+
+      <!-- Grid 2 kolom -->
+      <div class="grid grid-cols-1 gap-8">
+        <canvas id="tempChart" class="rounded-lg shadow-md bg-white p-4"></canvas>
+        <canvas id="humChart" class="rounded-lg shadow-md bg-white p-4"></canvas>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-100 border-t border-gray-300 text-gray-600 text-center py-5 mt-auto select-none text-sm">
+    &copy; 2025 UNSIA IoT Project. All rights reserved.
+  </footer>
+
+  <script th:inline="javascript">
+    Chart.defaults.font.size = 14;
+    Chart.defaults.color = '#374151'; // gray-700
+
+    const dataList = /*[[${dataList}]]*/ [];
+
+    const labels = dataList.map(d => {
+        const date = new Date(d.timestamp);
+        return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+    });
+    const tempData = dataList.map(d => d.temperature);
+    const humData = dataList.map(d => d.humidity);
+
+    const commonOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { font: { size: 13 } } },
+        tooltip: { enabled: true, mode: 'nearest' }
+      },
+      scales: {
+        x: {
+          display: true,
+          title: { display: true, text: 'Timestamp', font: { size: 14 } },
+          grid: { color: '#e5e7eb' }
+        },
+        y: {
+          display: true,
+          grid: { color: '#e5e7eb' }
+        }
+      }
+    };
+
+    new Chart(document.getElementById('tempChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Temperature (°C)',
+          data: tempData,
+          borderColor: '#ef4444', // red-500
+          backgroundColor: 'rgba(239, 68, 68, 0.2)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3
+        }]
+      },
+      options: {
+        ...commonOptions,
+        scales: {
+          ...commonOptions.scales,
+          y: { ...commonOptions.scales.y, min: 0, max: 50, title: { display: true, text: 'Temperature (°C)' } }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('humChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Humidity (%)',
+          data: humData,
+          borderColor: '#3b82f6', // blue-500
+          backgroundColor: 'rgba(59, 130, 246, 0.2)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3
+        }]
+      },
+      options: {
+        ...commonOptions,
+        scales: {
+          ...commonOptions.scales,
+          y: { ...commonOptions.scales.y, min: 0, max: 100, title: { display: true, text: 'Humidity (%)' } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
