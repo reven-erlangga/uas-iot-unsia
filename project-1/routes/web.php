@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SensorMonitoringController;
+use App\Http\Controllers\EspSetupController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', function () {
@@ -14,5 +14,4 @@ Route::get('/about', function () {
 })->name('about');
 
 Route::get('/sensor-monitoring', [SensorMonitoringController::class, 'index'])->name('sensor-monitoring');
-Route::get('/contact', [ContactController::class, 'index'])->name('contact');
-Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/esp-setup', [EspSetupController::class, 'index'])->name('esp-setup');

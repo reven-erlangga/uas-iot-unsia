@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class ContactController extends Controller
+class EspSetupController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Contact', [
+        return Inertia::render('EspSetup', [
             'appName' => config('app.name'),
         ]);
     }

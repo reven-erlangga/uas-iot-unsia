@@ -5,39 +5,33 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
                         <h1 class="text-3xl font-bold text-gray-900 mb-4">
-                            Welcome to Inertia.js + Vue 3 + Laravel!
+                            UAS IoT
                         </h1>
-                        <p class="text-gray-600 mb-6">
-                            This is a sample page demonstrating Inertia.js integration with Vue 3 and Laravel.
-                        </p>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <h2 class="text-lg font-semibold text-blue-900 mb-2">Features:</h2>
-                                <ul class="list-disc list-inside text-blue-800 space-y-1">
-                                    <li>Server-side rendering with Laravel</li>
-                                    <li>Client-side navigation with Vue 3</li>
-                                    <li>No API endpoints needed</li>
-                                    <li>Full-stack development experience</li>
+                                <h2 class="text-lg font-semibold text-blue-900 mb-2">Student Information:</h2>
+                                <ul class="list-none text-blue-800 space-y-1">
+                                    <li><strong>Nama:</strong> Reven Ferlian Erlangga</li>
+                                    <li><strong>NIM:</strong> 240401020001</li>
+                                    <li><strong>Kuliah:</strong> Unsia</li>
+                                    <li><strong>Kelas:</strong> IF601</li>
                                 </ul>
                             </div>
                             
                             <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                                <h2 class="text-lg font-semibold text-green-900 mb-2">Benefits:</h2>
-                                <ul class="list-disc list-inside text-green-800 space-y-1">
-                                    <li>Single-page app feel</li>
-                                    <li>Traditional server-side routing</li>
-                                    <li>Shared data between server and client</li>
-                                    <li>Built-in CSRF protection</li>
+                                <h2 class="text-lg font-semibold text-green-900 mb-2">Lecturers:</h2>
+                                <ul class="list-none text-green-800 space-y-1">
+                                    <li><strong>Dosen:</strong> Syahid Abdullah, S.Si., M.Kom.</li>
+                                    <li><strong>Profesor:</strong> Prof. Jong-Dae Park</li>
                                 </ul>
                             </div>
                         </div>
                         
                         <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Getting Started:</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Project Navigation:</h3>
                             <p class="text-gray-600 mb-4">
-                                You can now create new Vue components in the <code class="bg-gray-200 px-1 rounded">resources/js/Pages</code> directory 
-                                and render them from your Laravel controllers using <code class="bg-gray-200 px-1 rounded">Inertia::render()</code>.
+                                Welcome to the IoT project dashboard. You can navigate to different sections of the application below.
                             </p>
                             <div class="flex space-x-4">
                                 <Link
@@ -47,10 +41,16 @@
                                     Sensor Monitoring
                                 </Link>
                                 <Link
-                                    href="/about"
+                                    href="/esp-setup"
                                     class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
                                 >
-                                    Learn More
+                                    ESP Setup
+                                </Link>
+                                <Link
+                                    href="/about"
+                                    class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                >
+                                    About Project
                                 </Link>
                             </div>
                         </div>

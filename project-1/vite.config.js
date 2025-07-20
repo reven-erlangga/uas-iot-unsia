@@ -25,4 +25,10 @@ export default defineConfig({
             '@': resolve('resources/js'),
         },
     },
+    server: {
+        host: '192.168.1.12',
+        port: 5175,
+        strictPort: true,
+        cors: true,
+    },
 });
