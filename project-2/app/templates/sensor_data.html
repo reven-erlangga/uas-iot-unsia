@@ -53,11 +53,9 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Device ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sensor Type</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Temperature (°C)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Humidity (%)</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="sensor-table-body">
@@ -154,60 +152,42 @@
     <script>
         // Real data from Django backend
         const sensorData = JSON.parse('{{ sensor_data|escapejs }}');
-
-        // Function to render sensor data
         function renderSensorData(filteredData = sensorData) {
             const tableBody = document.getElementById('sensor-table-body');
             tableBody.innerHTML = '';
-
             filteredData.forEach(sensor => {
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50';
-                
-                const statusColor = sensor.status === 'Active' ? 'text-green-600' : 
-                                   sensor.status === 'Warning' ? 'text-yellow-600' : 'text-red-600';
-                
+                // Konversi UTC ke WIB (GMT+7)
+                let localTimestamp = '-';
+                if (sensor.timestamp) {
+                    const utcDate = new Date(sensor.timestamp);
+                    const localDate = new Date(utcDate.getTime() + (7 * 60 * 60 * 1000));
+                    localTimestamp = localDate.toISOString().replace('T', ' ').slice(0, 19);
+                }
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${sensor.deviceId}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${sensor.sensorType}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">${sensor.value}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${sensor.unit}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${sensor.timestamp}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColor} bg-${sensor.status === 'Active' ? 'green' : sensor.status === 'Warning' ? 'yellow' : 'red'}-100">
-                            ${sensor.status}
-                        </span>
-                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">${sensor.temperature}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">${sensor.humidity}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${localTimestamp}</td>
                 `;
                 tableBody.appendChild(row);
             });
-
-            // Update statistics
             updateStatistics(filteredData);
         }
-
-        // Function to update statistics
         function updateStatistics(data) {
             document.getElementById('total-sensors').textContent = data.length;
-            document.getElementById('active-sensors').textContent = data.filter(s => s.status === 'Active').length;
-            document.getElementById('alerts').textContent = data.filter(s => s.status === 'Alert').length;
+            document.getElementById('active-sensors').textContent = '-';
+            document.getElementById('alerts').textContent = '-';
             document.getElementById('last-update').textContent = data.length > 0 ? data[0].timestamp : '-';
         }
-
-        // Device filter functionality
         document.getElementById('device-filter').addEventListener('change', function() {
             const selectedDevice = this.value;
             const filteredData = selectedDevice ? sensorData.filter(sensor => sensor.deviceId === selectedDevice) : sensorData;
             renderSensorData(filteredData);
         });
-
-        // Initial render
         renderSensorData();
-
-        // Auto-refresh every 10 seconds (reload page to get latest data)
-        setInterval(() => {
-            location.reload();
-        }, 10000);
+        setInterval(() => { location.reload(); }, 10000);
     </script>
 </body>
 </html> 

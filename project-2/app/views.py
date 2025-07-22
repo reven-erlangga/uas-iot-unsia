@@ -6,6 +6,8 @@ import json
 from .models import SensorData
 from django.db.models import Q
 from django.core.serializers.json import DjangoJSONEncoder
+import pytz
+from datetime import timedelta
 
 # Create your views here.
 
@@ -32,37 +34,24 @@ def sensor_data(request):
         sensor_data_list = SensorData.objects.order_by('-timestamp')
     
     # Get unique device IDs for filter dropdown
-    device_ids = SensorData.objects.values_list('deviceId', flat=True).distinct()
+    device_ids = list(set(SensorData.objects.values_list('deviceId', flat=True)))
+    device_ids.sort()
     
     # Convert to list for template
     sensor_data_for_template = []
+    wib = pytz.timezone('Asia/Jakarta')
     for data in sensor_data_list:
-        # Determine status based on values
-        if data.temperature > 40 or data.humidity < 20:
-            status = 'Alert'
-        elif data.temperature > 35 or data.humidity > 80:
-            status = 'Warning'
-        else:
-            status = 'Active'
-            
+        ts = data.timestamp
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=pytz.UTC)
+        ts_wib = ts.astimezone(wib)
         sensor_data_for_template.append({
             'deviceId': data.deviceId,
-            'sensorType': 'Temperature',
-            'value': float(data.temperature),
-            'unit': '°C',
-            'timestamp': data.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            'status': status
+            'temperature': float(data.temperature),
+            'humidity': float(data.humidity),
+            'timestamp': ts_wib.strftime('%Y-%m-%d %H:%M:%S'),
         })
         
-        sensor_data_for_template.append({
-            'deviceId': data.deviceId,
-            'sensorType': 'Humidity',
-            'value': float(data.humidity),
-            'unit': '%',
-            'timestamp': data.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            'status': status
-        })
-    
     # Convert to JSON string for template
     sensor_data_json = json.dumps(sensor_data_for_template, cls=DjangoJSONEncoder)
     
@@ -74,31 +63,31 @@ def sensor_data(request):
     return render(request, 'sensor_data.html', context)
 
 def sensor_gauge(request):
-    # Get real device data from database
-    device_id = request.GET.get('deviceId', '')
-    
-    if device_id:
-        latest_data = SensorData.objects.filter(deviceId=device_id).order_by('-timestamp').first()
-    else:
-        latest_data = SensorData.objects.order_by('-timestamp').first()
-    
-    # Get all device IDs for dropdown
-    device_ids = SensorData.objects.values_list('deviceId', flat=True).distinct()
-    
-    # Get latest data for each device
+    device_ids = list(set(SensorData.objects.values_list('deviceId', flat=True)))
+    device_ids.sort()
+    device_id = request.GET.get('deviceId')
+    if not device_id and device_ids:
+        device_id = device_ids[0]
+    latest_data = SensorData.objects.filter(deviceId=device_id).order_by('-timestamp').first() if device_id else None
     device_data = {}
+    wib = pytz.timezone('Asia/Jakarta')
     for device in device_ids:
-        latest = SensorData.objects.filter(deviceId=device).order_by('-timestamp').first()
+        latest = SensorData.objects.filter(
+            deviceId=device,
+            temperature__isnull=False,
+            humidity__isnull=False
+        ).order_by('-timestamp').first()
         if latest:
+            ts = latest.timestamp
+            if ts.tzinfo is None:
+                ts = ts.replace(tzinfo=pytz.UTC)
+            ts_wib = ts.astimezone(wib)
             device_data[device] = {
                 'temperature': float(latest.temperature),
                 'humidity': float(latest.humidity),
-                'timestamp': latest.timestamp.isoformat()
+                'timestamp': ts_wib.strftime('%Y-%m-%d %H:%M:%S')
             }
-    
-    # Convert to JSON string for template
     device_data_json = json.dumps(device_data, cls=DjangoJSONEncoder)
-    
     context = {
         'device_data': device_data_json,
         'device_ids': device_ids,
@@ -125,7 +114,7 @@ def api_store_sensor_data(request):
         data = json.loads(request.body)
         
         # Validasi required fields
-        required_fields = ['apikey', 'deviceId', 'deviceName', 'temperature', 'humidity']
+        required_fields = ['apikey', 'deviceId', 'temperature', 'humidity']
         for field in required_fields:
             if field not in data:
                 return JsonResponse({
@@ -150,7 +139,6 @@ def api_store_sensor_data(request):
         sensor_data = SensorData.objects.create(
             apikey=data['apikey'],
             deviceId=data['deviceId'],
-            deviceName=data['deviceName'],
             temperature=data['temperature'],
             humidity=data['humidity']
         )
@@ -161,7 +149,6 @@ def api_store_sensor_data(request):
             'data': {
                 'id': sensor_data.id,
                 'deviceId': sensor_data.deviceId,
-                'deviceName': sensor_data.deviceName,
                 'temperature': sensor_data.temperature,
                 'humidity': sensor_data.humidity,
                 'timestamp': sensor_data.timestamp.isoformat()
@@ -205,7 +192,6 @@ def api_get_sensor_data(request):
                 'id': data.id,
                 'apikey': data.apikey,
                 'deviceId': data.deviceId,
-                'deviceName': data.deviceName,
                 'temperature': data.temperature,
                 'humidity': data.humidity,
                 'timestamp': data.timestamp.isoformat()
