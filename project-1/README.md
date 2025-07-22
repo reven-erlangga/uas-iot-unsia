@@ -1,61 +1,178 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# IoT Telemetry Monitoring Project
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This project is a web-based sensor data (telemetry) monitoring system built using **two popular PHP frameworks**: [CodeIgniter 3](https://codeigniter.com/) and [Laravel](https://laravel.com/). The system is designed to receive, store, and display sensor data (such as temperature, humidity, pressure, etc.) sent from IoT devices (e.g., ESP32) in both real-time and historical views.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Table of Contents
+- [Overview](#overview)
+- [Project Structure](#project-structure)
+- [Main Features](#main-features)
+- [System Architecture](#system-architecture)
+- [CodeIgniter vs Laravel Comparison](#codeigniter-vs-laravel-comparison)
+- [Getting Started](#getting-started)
+- [API & ESP32 Integration](#api--esp32-integration)
+- [License](#license)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Overview
 
-## Learning Laravel
+- **CodeIgniter**: Monitoring implementation with a simple MVC architecture, SQLite database, and API endpoints to receive data from IoT devices.
+- **Laravel**: Monitoring implementation with more modern features, Eloquent ORM, request validation, and more structured API endpoints.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Both frameworks can be used independently for sensor data monitoring needs.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Project Structure
 
-## Laravel Sponsors
+```
+project-1/
+├── codeIgniter/   # CodeIgniter application source code
+├── laravel/       # Laravel application source code
+└── README.md      # Main documentation
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## Main Features
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### CodeIgniter
+- Sensor data monitoring dashboard
+- API to receive telemetry data from ESP32
+- Data storage using SQLite
+- Real-time & historical data visualization
+- Data export (CSV/JSON)
+- Device management (setup, status, reset)
 
-## Contributing
+### Laravel
+- Sensor data monitoring dashboard
+- RESTful API for telemetry data CRUD
+- Data storage using relational databases (default: SQLite/MySQL)
+- Data validation & encryption (device_id, station_id)
+- Temperature & humidity trend visualization
+- More modern code structure (Repository, Request Validation, Eloquent ORM)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## System Architecture
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```
+[ESP32/IoT Device]
+      |
+      |  (HTTP POST JSON)
+      v
+[API Endpoint - CodeIgniter/Laravel]
+      |
+      v
+[Database]
+      |
+      v
+[Web Dashboard]
+```
 
-## Security Vulnerabilities
+- IoT devices send data to the API endpoint (choose either framework)
+- Data is stored in the database
+- The web dashboard displays data in real-time and historical views
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
+
+## CodeIgniter vs Laravel Comparison
+
+| Feature              | CodeIgniter 3                | Laravel                      |
+|----------------------|------------------------------|------------------------------|
+| Architecture         | Classic MVC, procedural      | Modern MVC, OOP, modular     |
+| Database             | SQLite                       | SQLite/MySQL/PostgreSQL      |
+| ORM                  | Query Builder                | Eloquent ORM                 |
+| Validation           | Manual in controller/model   | Request Validation           |
+| API                  | Simple REST                  | RESTful, resourceful         |
+| Security             | Basic                        | Encryption, CSRF, Middleware |
+| Extensions           | Easy, lightweight            | Very broad, large ecosystem  |
+| Documentation        | Simple                       | Very comprehensive           |
+
+---
+
+## Getting Started
+
+### CodeIgniter
+1. Go to the `codeIgniter/` folder
+2. Make sure PHP & SQLite are installed
+3. Run the database initialization script:
+   ```bash
+   php application/database/init_database.php
+   ```
+4. Set your web server to the `codeIgniter/` folder
+5. Access the application via browser
+
+### Laravel
+1. Go to the `laravel/` folder
+2. Install dependencies:
+   ```bash
+   composer install
+   ```
+3. Copy `.env.example` to `.env` and configure your database settings
+4. Run the database migrations:
+   ```bash
+   php artisan migrate
+   ```
+5. Start the local server:
+   ```bash
+   php artisan serve
+   ```
+6. Access the application via browser
+
+---
+
+## API & ESP32 Integration
+
+### Example Telemetry Data Payload
+```json
+{
+  "device_id": "ESP32_001",
+  "temperature": 25.5,
+  "humidity": 60.2,
+  "timestamp": "2024-01-01 12:00:00",
+  "metadata": { "signal": -45, "battery": 85.2 }
+}
+```
+
+### API Endpoints
+- **CodeIgniter**: `POST /api/telemetry/receive`
+- **Laravel**: `POST /api/telemetry`
+
+### Example ESP32 Data Sending Code (Arduino)
+```cpp
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
+const char* serverUrl = "http://your-server.com/api/telemetry";
+
+void sendTelemetryData(float temperature, float humidity) {
+    if (WiFi.status() == WL_CONNECTED) {
+        HTTPClient http;
+        http.begin(serverUrl);
+        http.addHeader("Content-Type", "application/json");
+        
+        DynamicJsonDocument doc(512);
+        doc["device_id"] = "ESP32_001";
+        doc["temperature"] = temperature;
+        doc["humidity"] = humidity;
+        doc["timestamp"] = "2024-01-01 12:00:00";
+        
+        String jsonString;
+        serializeJson(doc, jsonString);
+        http.POST(jsonString);
+        http.end();
+    }
+}
+```
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open source and uses the MIT license.

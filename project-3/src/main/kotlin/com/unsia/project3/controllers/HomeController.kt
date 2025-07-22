@@ -17,11 +17,37 @@ class HomeController(private val service: SensorDataService) {
         return "home"  // render templates/home.html
     }
 
-    @GetMapping("/{deviceId}")
-    fun showData(@PathVariable deviceId: String, model: Model): String {
+    @GetMapping("/sensor/chart")
+    fun showChartPage(model: Model): String {
+        val deviceIds = service.getDeviceIds()
+        model.addAttribute("deviceIds", deviceIds)
+        return "sensorchart"  // render templates/sensorchart.html
+    }
+
+    @GetMapping("/sensor/data")
+    fun showDataPage(model: Model): String {
+        val deviceIds = service.getDeviceIds()
+        model.addAttribute("deviceIds", deviceIds)
+        return "sensordata"  // render templates/sensordata.html
+    }
+
+    @GetMapping("/sensor/chart/{deviceId}")
+    fun showChartWithData(@PathVariable deviceId: String, model: Model): String {
         val dataList: List<SensorData> = service.getByDeviceId(deviceId)
+        val deviceIds = service.getDeviceIds()
         model.addAttribute("deviceId", deviceId)
         model.addAttribute("dataList", dataList)
+        model.addAttribute("deviceIds", deviceIds)
         return "sensorchart"  // render templates/sensorchart.html
+    }
+
+    @GetMapping("/sensor/data/{deviceId}")
+    fun showDataWithDevice(@PathVariable deviceId: String, model: Model): String {
+        val dataList: List<SensorData> = service.getByDeviceId(deviceId)
+        val deviceIds = service.getDeviceIds()
+        model.addAttribute("deviceId", deviceId)
+        model.addAttribute("dataList", dataList)
+        model.addAttribute("deviceIds", deviceIds)
+        return "sensordata"  // render templates/sensordata.html
     }
 }

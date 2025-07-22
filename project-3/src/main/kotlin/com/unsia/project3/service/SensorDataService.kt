@@ -18,4 +18,20 @@ class SensorDataService(private val repository: SensorDataRepository) {
         val limit: Pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "timestamp"))
         return repository.findByDeviceIdOrderByTimestampDesc(deviceId, limit)
     }
+
+    fun getAll(): List<SensorData> {
+        return repository.findAllByOrderByTimestampDesc()
+    }
+
+    fun getLatestByDeviceId(deviceId: String): SensorData? {
+        return repository.findTopByDeviceIdOrderByTimestampDesc(deviceId)
+    }
+
+    fun deleteByDeviceId(deviceId: String) {
+        repository.deleteByDeviceId(deviceId)
+    }
+
+    fun getDeviceIds(): List<String> {
+        return repository.findDistinctDeviceIds()
+    }
 }

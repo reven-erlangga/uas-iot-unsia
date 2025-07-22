@@ -28,8 +28,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-    // Database
-    runtimeOnly("com.h2database:h2")
+    // Database - SQLite
+    runtimeOnly("org.xerial:sqlite-jdbc:3.44.1.0")
+    implementation("org.hibernate.orm:hibernate-community-dialects")
 
     // Devtools untuk hot reload (opsional)
     developmentOnly("org.springframework.boot:spring-boot-devtools")

@@ -1,0 +1,81 @@
+{
+  "_AuthenticatedLayout-KZzF2LHa.js": {
+    "file": "assets/AuthenticatedLayout-KZzF2LHa.js",
+    "name": "AuthenticatedLayout",
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-OlrTOP50.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/Pages/About.vue": {
+    "file": "assets/About-l3VcvTri.js",
+    "name": "About",
+    "src": "resources/js/Pages/About.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_AuthenticatedLayout-KZzF2LHa.js"
+    ],
+    "css": [
+      "assets/app-OlrTOP50.css"
+    ]
+  },
+  "resources/js/Pages/EspSetup.vue": {
+    "file": "assets/EspSetup-D3dhUL23.js",
+    "name": "EspSetup",
+    "src": "resources/js/Pages/EspSetup.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_AuthenticatedLayout-KZzF2LHa.js"
+    ],
+    "css": [
+      "assets/app-OlrTOP50.css"
+    ]
+  },
+  "resources/js/Pages/SensorMonitoring.vue": {
+    "file": "assets/SensorMonitoring-BMveTk3G.js",
+    "name": "SensorMonitoring",
+    "src": "resources/js/Pages/SensorMonitoring.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_AuthenticatedLayout-KZzF2LHa.js"
+    ],
+    "css": [
+      "assets/app-OlrTOP50.css"
+    ]
+  },
+  "resources/js/Pages/Welcome.vue": {
+    "file": "assets/Welcome-sl4l-n4N.js",
+    "name": "Welcome",
+    "src": "resources/js/Pages/Welcome.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "_AuthenticatedLayout-KZzF2LHa.js"
+    ],
+    "css": [
+      "assets/app-OlrTOP50.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-C8G5Ai_V.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/Pages/About.vue",
+      "resources/js/Pages/EspSetup.vue",
+      "resources/js/Pages/SensorMonitoring.vue",
+      "resources/js/Pages/Welcome.vue"
+    ],
+    "css": [
+      "assets/app-OlrTOP50.css"
+    ]
+  }
+}

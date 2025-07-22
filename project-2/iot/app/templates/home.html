@@ -2,10 +2,94 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Halaman Tailwind</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IoT Dashboard - Home</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-  <h1 class="text-4xl font-bold text-blue-600">Halo dari Tailwind CSS di Django!</h1>
+<body class="bg-gray-100">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-xl font-semibold text-gray-800">IoT Sensor Dashboard</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="{% url 'home' %}" class="text-blue-600 font-medium">Home</a>
+          <a href="{% url 'sensor_data' %}" class="text-gray-600 hover:text-gray-900">Sensor Data</a>
+          <a href="{% url 'sensor_gauge' %}" class="text-gray-600 hover:text-gray-900">Sensor Gauge</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="text-center">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">Welcome to IoT Sensor Dashboard</h1>
+      <p class="text-xl text-gray-600 mb-8">Monitor your sensors in real-time with beautiful visualizations</p>
+      
+      <!-- Feature Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Sensor Data</h3>
+            <p class="text-gray-600 mb-4">View all sensor readings organized by device ID with filtering capabilities</p>
+            <a href="{% url 'sensor_data' %}" class="inline-block bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">
+              View Data
+            </a>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+          <div class="text-center">
+            <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">Sensor Gauge</h3>
+            <p class="text-gray-600 mb-4">Monitor temperature and humidity with custom speedometer-style gauge charts</p>
+            <a href="{% url 'sensor_gauge' %}" class="inline-block bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition-colors">
+              View Gauges
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Section -->
+      <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-blue-600">{{ total_devices|default:"0" }}</div>
+            <div class="text-gray-600">Active Devices</div>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-green-600">{{ total_sensors|default:"0" }}</div>
+            <div class="text-gray-600">Total Sensors</div>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow">
+          <div class="text-center">
+            <div class="text-3xl font-bold text-yellow-600">
+              {% if last_update %}
+                {{ last_update|date:"H:i" }}
+              {% else %}
+                -
+              {% endif %}
+            </div>
+            <div class="text-gray-600">Last Update</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

@@ -22,8 +22,9 @@
         UNSIA IoT
       </a>
       <ul class="flex space-x-8 text-base font-medium text-gray-600">
-        <li><a href="#" class="hover:text-gray-900 transition">Chart</a></li>
-        <li><a href="#" class="hover:text-gray-900 transition">Data</a></li>
+        <li><a href="/" class="hover:text-gray-900 transition">Home</a></li>
+        <li><a href="/sensor/chart" class="hover:text-gray-900 transition">Chart</a></li>
+        <li><a href="/sensor/data" class="hover:text-gray-900 transition">Data</a></li>
       </ul>
     </div>
   </nav>
@@ -37,14 +38,49 @@
 
     <section class="bg-gray-50 rounded-xl p-8 shadow-md w-full border border-gray-200">
 
-      <h2 class="text-2xl font-semibold mb-6 border-b border-gray-300 pb-3 text-gray-800">
-        Device: <span th:text="${deviceId}">device01</span>
-      </h2>
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-gray-300 pb-3">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4 md:mb-0">
+          Sensor Data Chart
+        </h2>
+        
+        <div class="flex flex-col sm:flex-row gap-4 items-center">
+          <label for="deviceSelect" class="text-sm font-medium text-gray-700">Select Device:</label>
+          <select id="deviceSelect" class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="">Choose a device...</option>
+            <option th:each="deviceId : ${deviceIds}" 
+                    th:value="${deviceId}" 
+                    th:text="${deviceId}">
+            </option>
+          </select>
+          <button id="loadDataBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+            Load Data
+          </button>
+        </div>
+      </div>
 
-      <!-- Grid 2 kolom -->
-      <div class="grid grid-cols-1 gap-8">
-        <canvas id="tempChart" class="rounded-lg shadow-md bg-white p-4"></canvas>
-        <canvas id="humChart" class="rounded-lg shadow-md bg-white p-4"></canvas>
+      <div id="chartContainer" th:if="${dataList != null and !#lists.isEmpty(dataList)}">
+        <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 class="text-lg font-semibold text-blue-800 mb-2">
+            Device: <span id="currentDeviceId" class="font-mono">-</span>
+          </h3>
+          <p class="text-blue-700 text-sm">
+            Last updated: <span id="lastUpdated">-</span>
+          </p>
+        </div>
+
+        <!-- Grid 2 kolom -->
+        <div class="grid grid-cols-1 gap-8">
+          <canvas id="tempChart" class="rounded-lg shadow-md bg-white p-4"></canvas>
+          <canvas id="humChart" class="rounded-lg shadow-md bg-white p-4"></canvas>
+        </div>
+      </div>
+
+      <div id="noDataMessage" class="text-center py-12 text-gray-500" th:if="${dataList == null or #lists.isEmpty(dataList)}">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No data selected</h3>
+        <p class="mt-1 text-sm text-gray-500">Please select a device and click "Load Data" to view sensor charts.</p>
       </div>
     </section>
 
@@ -59,83 +95,169 @@
     Chart.defaults.font.size = 14;
     Chart.defaults.color = '#374151'; // gray-700
 
-    const dataList = /*[[${dataList}]]*/ [];
+    let tempChart = null;
+    let humChart = null;
 
-    const labels = dataList.map(d => {
+    // Server-side data (if available)
+    const serverDataList = /*[[${dataList}]]*/ [];
+    const serverDeviceId = /*[[${deviceId}]]*/ null;
+
+    // Load available devices on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // If we have server-side data, display it immediately
+      if (serverDataList && serverDataList.length > 0 && serverDeviceId) {
+        document.getElementById('deviceSelect').value = serverDeviceId;
+        document.getElementById('currentDeviceId').textContent = serverDeviceId;
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+        createCharts(serverDataList);
+      }
+      
+      // Add event listeners
+      document.getElementById('loadDataBtn').addEventListener('click', loadSensorData);
+      document.getElementById('deviceSelect').addEventListener('change', function() {
+        const selectedDevice = this.value;
+        if (selectedDevice) {
+          document.getElementById('loadDataBtn').disabled = false;
+        } else {
+          document.getElementById('loadDataBtn').disabled = true;
+        }
+      });
+    });
+
+    // Load device list from API (fallback if no server-side data)
+    async function loadDeviceList() {
+      try {
+        const response = await fetch('/api/sensors/devices');
+        const deviceIds = await response.json();
+        
+        const deviceSelect = document.getElementById('deviceSelect');
+        deviceSelect.innerHTML = '<option value="">Choose a device...</option>';
+        
+        deviceIds.forEach(deviceId => {
+          const option = document.createElement('option');
+          option.value = deviceId;
+          option.textContent = deviceId;
+          deviceSelect.appendChild(option);
+        });
+        
+        console.log('Available devices:', deviceIds);
+      } catch (error) {
+        console.error('Error loading device list:', error);
+        showError('Failed to load device list');
+      }
+    }
+
+    // Load sensor data for selected device
+    async function loadSensorData() {
+      const selectedDevice = document.getElementById('deviceSelect').value;
+      if (!selectedDevice) {
+        showError('Please select a device first');
+        return;
+      }
+
+      // Navigate to the chart page with the selected device
+      window.location.href = `/sensor/chart/${selectedDevice}`;
+    }
+
+    // Create temperature and humidity charts
+    function createCharts(dataList) {
+      // Destroy existing charts if they exist
+      if (tempChart) tempChart.destroy();
+      if (humChart) humChart.destroy();
+
+      const labels = dataList.map(d => {
         const date = new Date(d.timestamp);
         return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
-    });
-    const tempData = dataList.map(d => d.temperature);
-    const humData = dataList.map(d => d.humidity);
+      });
+      const tempData = dataList.map(d => d.temperature);
+      const humData = dataList.map(d => d.humidity);
 
-    const commonOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { labels: { font: { size: 13 } } },
-        tooltip: { enabled: true, mode: 'nearest' }
-      },
-      scales: {
-        x: {
-          display: true,
-          title: { display: true, text: 'Timestamp', font: { size: 14 } },
-          grid: { color: '#e5e7eb' }
+      const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { font: { size: 13 } } },
+          tooltip: { enabled: true, mode: 'nearest' }
         },
-        y: {
-          display: true,
-          grid: { color: '#e5e7eb' }
-        }
-      }
-    };
-
-    new Chart(document.getElementById('tempChart').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Temperature (°C)',
-          data: tempData,
-          borderColor: '#ef4444', // red-500
-          backgroundColor: 'rgba(239, 68, 68, 0.2)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.3,
-          pointRadius: 3
-        }]
-      },
-      options: {
-        ...commonOptions,
         scales: {
-          ...commonOptions.scales,
-          y: { ...commonOptions.scales.y, min: 0, max: 50, title: { display: true, text: 'Temperature (°C)' } }
+          x: {
+            display: true,
+            title: { display: true, text: 'Timestamp', font: { size: 14 } },
+            grid: { color: '#e5e7eb' }
+          },
+          y: {
+            display: true,
+            grid: { color: '#e5e7eb' }
+          }
         }
-      }
-    });
+      };
 
-    new Chart(document.getElementById('humChart').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Humidity (%)',
-          data: humData,
-          borderColor: '#3b82f6', // blue-500
-          backgroundColor: 'rgba(59, 130, 246, 0.2)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.3,
-          pointRadius: 3
-        }]
-      },
-      options: {
-        ...commonOptions,
-        scales: {
-          ...commonOptions.scales,
-          y: { ...commonOptions.scales.y, min: 0, max: 100, title: { display: true, text: 'Humidity (%)' } }
+      // Create temperature chart
+      tempChart = new Chart(document.getElementById('tempChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Temperature (°C)',
+            data: tempData,
+            borderColor: '#ef4444', // red-500
+            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3
+          }]
+        },
+        options: {
+          ...commonOptions,
+          scales: {
+            ...commonOptions.scales,
+            y: { 
+              ...commonOptions.scales.y, 
+              min: Math.min(...tempData) - 2, 
+              max: Math.max(...tempData) + 2, 
+              title: { display: true, text: 'Temperature (°C)' } 
+            }
+          }
         }
-      }
-    });
+      });
+
+      // Create humidity chart
+      humChart = new Chart(document.getElementById('humChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Humidity (%)',
+            data: humData,
+            borderColor: '#3b82f6', // blue-500
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.3,
+            pointRadius: 3
+          }]
+        },
+        options: {
+          ...commonOptions,
+          scales: {
+            ...commonOptions.scales,
+            y: { 
+              ...commonOptions.scales.y, 
+              min: Math.min(...humData) - 5, 
+              max: Math.max(...humData) + 5, 
+              title: { display: true, text: 'Humidity (%)' } 
+            }
+          }
+        }
+      });
+    }
+
+    // Show error message
+    function showError(message) {
+      alert(message); // Simple error handling - you can improve this
+    }
   </script>
 </body>
 </html>

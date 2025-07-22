@@ -1,23 +1,144 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8">
-  <title>Sensor Data</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sensor Data - UNSIA IoT</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-light">
-  <div class="container mt-5">
-    <h2 class="mb-4 text-primary">Sensor Data for <span th:text="${deviceId}"></span></h2>
-    <ul class="list-group">
-      <li class="list-group-item d-flex justify-content-between align-items-center"
-          th:each="data : ${dataList}">
-        <div>
-          🌡️ Temp: <strong th:text="${data.temperature}">0.0</strong> °C |
-          💧 Hum: <strong th:text="${data.humidity}">0.0</strong> % |
-          🕒 Time: <small th:text="${data.timestamp}">yyyy-MM-dd HH:mm:ss</small>
+<body class="min-h-screen flex flex-col bg-white text-gray-700 font-sans">
+
+  <!-- Navigation -->
+  <nav class="bg-gray-100 border-b border-gray-300 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="/" class="text-2xl font-semibold tracking-wide text-gray-900 hover:text-gray-700 transition duration-300">
+        UNSIA IoT
+      </a>
+      <ul class="flex space-x-8 text-base font-medium text-gray-600">
+        <li><a href="/" class="hover:text-gray-900 transition">Home</a></li>
+        <li><a href="/sensor/chart" class="hover:text-gray-900 transition">Chart</a></li>
+        <li><a href="/sensor/data" class="hover:text-gray-900 transition">Data</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="flex-grow flex flex-col justify-center items-center text-center px-6 py-20 max-w-4xl mx-auto space-y-8">
+
+    <h1 class="text-4xl font-extrabold leading-snug tracking-tight text-gray-900">
+      Sensor Data
+    </h1>
+
+    <section class="bg-gray-50 rounded-xl p-8 shadow-md w-full border border-gray-200">
+
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-gray-300 pb-3">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4 md:mb-0">
+          Sensor Data
+        </h2>
+        
+        <div class="flex flex-col sm:flex-row gap-4 items-center">
+          <label for="deviceSelect" class="text-sm font-medium text-gray-700">Select Device:</label>
+          <select id="deviceSelect" class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <option value="">Choose a device...</option>
+            <option th:each="deviceId : ${deviceIds}" 
+                    th:value="${deviceId}" 
+                    th:text="${deviceId}">
+            </option>
+          </select>
+          <button id="loadDataBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+            Load Data
+          </button>
         </div>
-      </li>
-    </ul>
-  </div>
+      </div>
+
+      <div id="dataContainer" th:if="${dataList != null and !#lists.isEmpty(dataList)}">
+        <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 class="text-lg font-semibold text-blue-800 mb-2">
+            Device: <span th:text="${deviceId}" class="font-mono">device01</span>
+          </h3>
+          <p class="text-blue-700 text-sm">
+            Total records: <span th:text="${#lists.size(dataList)}">0</span>
+          </p>
+        </div>
+
+        <div class="space-y-4">
+        <div th:each="data : ${dataList}" 
+             class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
+            <div class="flex items-center space-x-6">
+              <div class="flex items-center space-x-2">
+                <span class="text-2xl">🌡️</span>
+                <span class="text-lg font-semibold text-red-600">
+                  <span th:text="${data.temperature}">0.0</span> °C
+                </span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-2xl">💧</span>
+                <span class="text-lg font-semibold text-blue-600">
+                  <span th:text="${data.humidity}">0.0</span> %
+                </span>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 text-gray-500">
+              <span class="text-lg">🕒</span>
+              <span class="text-sm font-mono" th:text="${data.timestamp}">yyyy-MM-dd HH:mm:ss</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div th:if="${#lists.isEmpty(dataList)}" class="text-center py-12 text-gray-500">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No data available</h3>
+        <p class="mt-1 text-sm text-gray-500">No sensor data found for this device.</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-100 border-t border-gray-300 text-gray-600 text-center py-5 mt-auto select-none text-sm">
+    &copy; 2025 UNSIA IoT Project. All rights reserved.
+  </footer>
+
+  <script th:inline="javascript">
+    // Server-side data (if available)
+    const serverDataList = /*[[${dataList}]]*/ [];
+    const serverDeviceId = /*[[${deviceId}]]*/ null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // If we have server-side data, select the device
+      if (serverDeviceId) {
+        document.getElementById('deviceSelect').value = serverDeviceId;
+      }
+      
+      // Add event listeners
+      document.getElementById('loadDataBtn').addEventListener('click', loadSensorData);
+      document.getElementById('deviceSelect').addEventListener('change', function() {
+        const selectedDevice = this.value;
+        if (selectedDevice) {
+          document.getElementById('loadDataBtn').disabled = false;
+        } else {
+          document.getElementById('loadDataBtn').disabled = true;
+        }
+      });
+    });
+
+    // Load sensor data for selected device
+    async function loadSensorData() {
+      const selectedDevice = document.getElementById('deviceSelect').value;
+      if (!selectedDevice) {
+        alert('Please select a device first');
+        return;
+      }
+
+      // Navigate to the data page with the selected device
+      window.location.href = `/sensor/data/${selectedDevice}`;
+    }
+  </script>
+
 </body>
 </html>

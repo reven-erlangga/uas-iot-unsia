@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensor Gauge - IoT Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-semibold text-gray-800">IoT Sensor Dashboard</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'home' %}" class="text-gray-600 hover:text-gray-900">Home</a>
+                    <a href="{% url 'sensor_data' %}" class="text-gray-600 hover:text-gray-900">Sensor Data</a>
+                    <a href="{% url 'sensor_gauge' %}" class="text-blue-600 font-medium">Sensor Gauge</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Sensor Gauge</h2>
+            <p class="text-gray-600">Menampilkan temperature dan humidity terakhir dalam bentuk gauge chart</p>
+        </div>
+
+        <!-- Device Selection -->
+        <div class="mb-6">
+            <label for="device-select" class="block text-sm font-medium text-gray-700 mb-2">Select Device:</label>
+            <select id="device-select" class="block w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                {% for device_id in device_ids %}
+                <option value="{{ device_id }}" {% if device_id == selected_device %}selected{% endif %}>{{ device_id }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Gauge Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Temperature Gauge -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-900">Temperature</h3>
+                    <p class="text-sm text-gray-500">Current temperature reading</p>
+                </div>
+                <div class="relative" style="height: 300px;">
+                    <canvas id="temperatureGauge"></canvas>
+                </div>
+                <div class="mt-4 text-center">
+                    <div class="flex justify-between text-sm text-gray-500 px-4">
+                        <span>0°C</span>
+                        <span>50°C</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Humidity Gauge -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-semibold text-gray-900">Humidity</h3>
+                    <p class="text-sm text-gray-500">Current humidity reading</p>
+                </div>
+                <div class="relative" style="height: 300px;">
+                    <canvas id="humidityGauge"></canvas>
+                </div>
+                <div class="mt-4 text-center">
+                    <div class="flex justify-between text-sm text-gray-500 px-4">
+                        <span>0%</span>
+                        <span>100%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-time Data Table -->
+        <div class="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Latest Readings</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Real-time temperature and humidity data</p>
+            </div>
+            <div class="border-t border-gray-200">
+                <dl>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Device ID</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2" id="current-device">
+                            {% if latest_data %}{{ latest_data.deviceId }}{% else %}-{% endif %}
+                        </dd>
+                    </div>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Temperature</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2" id="current-temp">
+                            {% if latest_data %}{{ latest_data.temperature|floatformat:1 }}°C{% else %}-{% endif %}
+                        </dd>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Humidity</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2" id="current-hum">
+                            {% if latest_data %}{{ latest_data.humidity|floatformat:1 }}%{% else %}-{% endif %}
+                        </dd>
+                    </div>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2" id="last-updated">
+                            {% if latest_data %}{{ latest_data.timestamp|date:"Y-m-d H:i:s" }}{% else %}-{% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Status Indicators -->
+        <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Temperature Status</dt>
+                                <dd class="text-lg font-medium text-gray-900" id="temp-status">Normal</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Humidity Status</dt>
+                                <dd class="text-lg font-medium text-gray-900" id="hum-status">Normal</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Update Frequency</dt>
+                                <dd class="text-lg font-medium text-gray-900">30s</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Real data from Django backend
+        const deviceData = JSON.parse('{{ device_data|escapejs }}');
+
+        let temperatureChart, humidityChart;
+        let currentDevice = 'device-001';
+
+        // Initialize charts using Chart.js annotation plugin
+        function initCharts() {
+            const tempCtx = document.getElementById('temperatureGauge').getContext('2d');
+            const humCtx = document.getElementById('humidityGauge').getContext('2d');
+
+            // Temperature Gauge
+            temperatureChart = new Chart(tempCtx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [deviceData[currentDevice].temperature, 50 - deviceData[currentDevice].temperature],
+                        backgroundColor: [
+                            getTemperatureColor(deviceData[currentDevice].temperature),
+                            '#e5e7eb'
+                        ],
+                        borderWidth: 0,
+                        cutout: '80%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    aspectRatio: 2,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false },
+                        annotation: {
+                            annotations: {
+                                gaugeValue: {
+                                    type: 'doughnutLabel',
+                                    content: ({chart}) => [
+                                        chart.data.datasets[0].data[0].toFixed(1) + '°C',
+                                        'Temperature'
+                                    ],
+                                    drawTime: 'beforeDraw',
+                                    position: { y: '0%', },
+                                    font: [{size: 32, weight: 'bold'}, {size: 16}],
+                                    color: ({chart}) => [getTemperatureColor(chart.data.datasets[0].data[0]), '#6b7280']
+                                }
+                            }
+                        }
+                    },
+                    rotation: -90,
+                    circumference: 180
+                },
+                plugins: [{
+                    id: 'speedometerNeedle',
+                    afterDraw: function(chart) {
+                        const {ctx, width, height} = chart;
+                        const centerX = width / 2;
+                        const centerY = height * 0.75;
+                        const radius = Math.min(width, height) * 0.35;
+                        
+                        // Calculate needle angle based on current value
+                        const value = chart.data.datasets[0].data[0];
+                        const maxValue = 50; // Temperature max
+                        const percentage = value / maxValue;
+                        const needleAngle = Math.PI + (Math.PI * percentage);
+                        
+                        ctx.save();
+                        
+                        // Draw needle
+                        const needleLength = radius * 0.8;
+                        const needleX = centerX + Math.cos(needleAngle) * needleLength;
+                        const needleY = centerY + Math.sin(needleAngle) * needleLength;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.lineTo(needleX, needleY);
+                        ctx.strokeStyle = '#374151';
+                        ctx.lineWidth = 4;
+                        ctx.stroke();
+                        
+                        // Draw needle center
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#374151';
+                        ctx.fill();
+                        
+                        ctx.restore();
+                    }
+                }]
+            });
+
+            // Humidity Gauge
+            humidityChart = new Chart(humCtx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [deviceData[currentDevice].humidity, 100 - deviceData[currentDevice].humidity],
+                        backgroundColor: [
+                            getHumidityColor(deviceData[currentDevice].humidity),
+                            '#e5e7eb'
+                        ],
+                        borderWidth: 0,
+                        cutout: '80%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    aspectRatio: 2,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false },
+                        annotation: {
+                            annotations: {
+                                gaugeValue: {
+                                    type: 'doughnutLabel',
+                                    content: ({chart}) => [
+                                        chart.data.datasets[0].data[0].toFixed(1) + '%',
+                                        'Humidity'
+                                    ],
+                                    drawTime: 'beforeDraw',
+                                    position: { y: '0%' },
+                                    font: [{size: 32, weight: 'bold'}, {size: 16}],
+                                    color: ({chart}) => [getHumidityColor(chart.data.datasets[0].data[0]), '#6b7280']
+                                }
+                            }
+                        }
+                    },
+                    rotation: -90,
+                    circumference: 180
+                },
+                plugins: [{
+                    id: 'speedometerNeedle',
+                    afterDraw: function(chart) {
+                        const {ctx, width, height} = chart;
+                        const centerX = width / 2;
+                        const centerY = height * 0.75;
+                        const radius = Math.min(width, height) * 0.35;
+                        
+                        // Calculate needle angle based on current value
+                        const value = chart.data.datasets[0].data[0];
+                        const maxValue = 100; // Humidity max
+                        const percentage = value / maxValue;
+                        const needleAngle = Math.PI + (Math.PI * percentage);
+                        
+                        ctx.save();
+                        
+                        // Draw needle
+                        const needleLength = radius * 0.8;
+                        const needleX = centerX + Math.cos(needleAngle) * needleLength;
+                        const needleY = centerY + Math.sin(needleAngle) * needleLength;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.lineTo(needleX, needleY);
+                        ctx.strokeStyle = '#374151';
+                        ctx.lineWidth = 4;
+                        ctx.stroke();
+                        
+                        // Draw needle center
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#374151';
+                        ctx.fill();
+                        
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+
+        // Color functions
+        function getTemperatureColor(value) {
+            if (value < 20) return '#3b82f6'; // Blue
+            else if (value < 30) return '#10b981'; // Green
+            else if (value < 40) return '#f59e0b'; // Yellow
+            else return '#ef4444'; // Red
+        }
+
+        function getHumidityColor(value) {
+            if (value < 30) return '#ef4444'; // Red
+            else if (value < 60) return '#10b981'; // Green
+            else if (value < 80) return '#f59e0b'; // Yellow
+            else return '#3b82f6'; // Blue
+        }
+
+        // Update charts with new data
+        function updateCharts() {
+            const data = deviceData[currentDevice];
+            
+            // Update temperature chart
+            temperatureChart.data.datasets[0].data = [data.temperature, 50 - data.temperature];
+            temperatureChart.data.datasets[0].backgroundColor = [
+                getTemperatureColor(data.temperature),
+                '#e5e7eb'
+            ];
+            temperatureChart.options.plugins.annotation.annotations.gaugeValue.content = ({chart}) => [
+                chart.data.datasets[0].data[0].toFixed(1) + '°C',
+                'Temperature'
+            ];
+            temperatureChart.options.plugins.annotation.annotations.gaugeValue.color = ({chart}) => [
+                getTemperatureColor(chart.data.datasets[0].data[0]), 
+                '#6b7280'
+            ];
+            
+            // Update humidity chart
+            humidityChart.data.datasets[0].data = [data.humidity, 100 - data.humidity];
+            humidityChart.data.datasets[0].backgroundColor = [
+                getHumidityColor(data.humidity),
+                '#e5e7eb'
+            ];
+            humidityChart.options.plugins.annotation.annotations.gaugeValue.content = ({chart}) => [
+                chart.data.datasets[0].data[0].toFixed(1) + '%',
+                'Humidity'
+            ];
+            humidityChart.options.plugins.annotation.annotations.gaugeValue.color = ({chart}) => [
+                getHumidityColor(chart.data.datasets[0].data[0]), 
+                '#6b7280'
+            ];
+            
+            temperatureChart.update('none');
+            humidityChart.update('none');
+            
+            // Update display values
+            document.getElementById('current-temp').textContent = `${data.temperature.toFixed(1)}°C`;
+            document.getElementById('current-hum').textContent = `${data.humidity.toFixed(1)}%`;
+            document.getElementById('current-device').textContent = currentDevice;
+            
+            // Update status
+            updateStatus(data);
+        }
+
+        // Update status indicators
+        function updateStatus(data) {
+            let tempStatus, humStatus;
+            
+            if (data.temperature < 20) tempStatus = 'Cold';
+            else if (data.temperature < 30) tempStatus = 'Normal';
+            else if (data.temperature < 40) tempStatus = 'Warm';
+            else tempStatus = 'Hot';
+            
+            if (data.humidity < 30) humStatus = 'Dry';
+            else if (data.humidity < 60) humStatus = 'Normal';
+            else if (data.humidity < 80) humStatus = 'Humid';
+            else humStatus = 'Very Humid';
+            
+            document.getElementById('temp-status').textContent = tempStatus;
+            document.getElementById('hum-status').textContent = humStatus;
+        }
+
+        // Device selection handler
+        document.getElementById('device-select').addEventListener('change', function() {
+            currentDevice = this.value;
+            updateCharts();
+        });
+
+        // Initialize
+        initCharts();
+        updateCharts();
+
+        // Update timestamp
+        function updateTimestamp() {
+            const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            document.getElementById('last-updated').textContent = now;
+        }
+
+        // Auto-refresh every 30 seconds (reload page to get latest data)
+        setInterval(() => {
+            location.reload();
+        }, 30000);
+
+        // Initial timestamp
+        updateTimestamp();
+    </script>
+</body>
+</html> 

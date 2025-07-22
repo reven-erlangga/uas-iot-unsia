@@ -1,0 +1,207 @@
+{
+	"info": {
+		"_postman_id": "sensor-data-api-collection",
+		"name": "Sensor Data API",
+		"description": "Collection untuk testing API sensor data dengan SQLite",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Save Sensor Data",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"apikey\": \"sensor-api-key-123\",\n    \"deviceId\": \"temp-sensor-01\",\n    \"deviceName\": \"Temperature & Humidity Sensor\",\n    \"temperature\": 24.5,\n    \"humidity\": 68.3\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8002/api/sensors",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"api",
+						"sensors"
+					]
+				}
+			}
+		},
+		{
+			"name": "Get All Sensor Data",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8002/api/sensors",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"api",
+						"sensors"
+					]
+				}
+			}
+		},
+		{
+			"name": "Get Sensor Data by Device ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8002/api/sensors/temp-sensor-01",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"api",
+						"sensors",
+						"temp-sensor-01"
+					]
+				}
+			}
+		},
+		{
+			"name": "Get Latest Sensor Data by Device ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8002/api/sensors/temp-sensor-01/latest",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"api",
+						"sensors",
+						"temp-sensor-01",
+						"latest"
+					]
+				}
+			}
+		},
+		{
+			"name": "Delete Sensor Data by Device ID",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8002/api/sensors/temp-sensor-01",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8002",
+					"path": [
+						"api",
+						"sensors",
+						"temp-sensor-01"
+					]
+				}
+			}
+		},
+		{
+			"name": "Save Multiple Sensor Data",
+			"item": [
+				{
+					"name": "Sensor Data 1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"apikey\": \"sensor-api-key-123\",\n    \"deviceId\": \"temp-sensor-01\",\n    \"deviceName\": \"Temperature & Humidity Sensor\",\n    \"temperature\": 24.5,\n    \"humidity\": 68.3\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8002/api/sensors",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8002",
+							"path": [
+								"api",
+								"sensors"
+							]
+						}
+					}
+				},
+				{
+					"name": "Sensor Data 2",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"apikey\": \"sensor-api-key-456\",\n    \"deviceId\": \"temp-sensor-02\",\n    \"deviceName\": \"Outdoor Weather Station\",\n    \"temperature\": 28.2,\n    \"humidity\": 45.7\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8002/api/sensors",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8002",
+							"path": [
+								"api",
+								"sensors"
+							]
+						}
+					}
+				},
+				{
+					"name": "Sensor Data 3",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"apikey\": \"sensor-api-key-789\",\n    \"deviceId\": \"temp-sensor-03\",\n    \"deviceName\": \"Indoor Climate Monitor\",\n    \"temperature\": 22.1,\n    \"humidity\": 72.8\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8002/api/sensors",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8002",
+							"path": [
+								"api",
+								"sensors"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+} 
