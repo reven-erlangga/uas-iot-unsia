@@ -127,7 +127,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_ROOT = '/srv/django/R20001/staticfiles'
 CSRF_COOKIE_PATH = '/django/'
 CSRF_TRUSTED_ORIGINS = [ 'https://r20001.belajarhub.id', ]
-FORCE_SCRIPT_NAME = '/django'
+FORCE_SCRIPT_NAME = '/'
 STATIC_URL = '/django/static/'
 MEDIA_URL = '/django/media/'
 
